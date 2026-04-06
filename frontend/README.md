@@ -1,16 +1,43 @@
-# React + Vite
+# Real-Time Chat Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+A full-stack chat application supporting messaging, delete options, and pinning with real-time updates using polling.
 
-Currently, two official plugins are available:
+## Features
+- Send & receive messages
+- Delete for Me / Delete for Everyone
+- Pin messages
+- Real-time updates (polling)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
+- Frontend: React (Vite)
+- Backend: Node.js, Express
+- Database: MongoDB Atlas
+- Deployment: Vercel + Render
 
-## React Compiler
+## Setup Instructions
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Backend
+cd backend
+npm install
+node server.js
 
-## Expanding the ESLint configuration
+### Frontend
+cd frontend
+npm install
+npm run dev
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## API Endpoints
+- GET /api/messages
+- POST /api/messages
+- DELETE /api/messages/:id
+- PUT /api/messages/pin/:id
+
+## Approach
+- Used REST APIs for communication
+- Implemented polling for real-time updates
+- Used MongoDB for persistent storage
+
+## Tradeoffs
+- Polling instead of WebSockets due to time constraints
+- Simple UI for faster implementation
