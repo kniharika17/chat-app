@@ -6,18 +6,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Debug log
-console.log("Using URI:", process.env.MONGO_URI);
-
-// MongoDB connect
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => {
-    console.log("Mongo Error:", err);
+    console.error("Mongo Error:", err);
     process.exit(1);
   });
 
-// Model
 const Message = mongoose.model("Message", {
   content: String,
   timestamp: { type: Date, default: Date.now },
@@ -25,30 +20,70 @@ const Message = mongoose.model("Message", {
   isPinned: { type: Boolean, default: false }
 });
 
-// Routes
+
+// ✅ CREATE MESSAGE (VALIDATION ADDED)
 app.post("/api/messages", async (req, res) => {
-  const msg = new Message({ content: req.body.content });
-  await msg.save();
-  res.json(msg);
+  try {
+    const { content } = req.body;
+
+    if (!content || content.trim() === "") {
+      return res.status(400).json({ error: "Message cannot be empty" });
+    }
+
+    const msg = new Message({ content });
+    await msg.save();
+
+    res.json(msg);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
+
+// ✅ GET MESSAGES
 app.get("/api/messages", async (req, res) => {
-  const msgs = await Message.find();
-  res.json(msgs);
+  try {
+    const msgs = await Message.find().sort({ timestamp: 1 });
+    res.json(msgs);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
+
+// ✅ DELETE (FIXED EDGE CASE)
 app.delete("/api/messages/:id", async (req, res) => {
-  await Message.findByIdAndUpdate(req.params.id, { isDeleted: true });
-  res.json({ msg: "Deleted" });
+  try {
+    await Message.findByIdAndUpdate(req.params.id, {
+      isDeleted: true,
+      isPinned: false   // 🔥 important fix
+    });
+
+    res.json({ msg: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
+
+// ✅ PIN TOGGLE
 app.put("/api/messages/pin/:id", async (req, res) => {
-  const msg = await Message.findById(req.params.id);
-  msg.isPinned = !msg.isPinned;
-  await msg.save();
-  res.json(msg);
+  try {
+    const msg = await Message.findById(req.params.id);
+
+    if (!msg || msg.isDeleted) {
+      return res.status(400).json({ error: "Invalid message" });
+    }
+
+    msg.isPinned = !msg.isPinned;
+    await msg.save();
+
+    res.json(msg);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// Server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
