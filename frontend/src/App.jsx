@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api/messages";
+const API = "https://chat-backend-muc1.onrender.com/api/messages";
 
 function App() {
   const [messages, setMessages] = useState([]);
