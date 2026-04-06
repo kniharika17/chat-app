@@ -28,18 +28,16 @@ function App() {
     fetchMessages();
   };
 
-  // 🔥 NEW DELETE HANDLER
   const handleDelete = async (id) => {
     const choice = window.prompt(
-      "Type:\n1 → Delete for Me\n2 → Delete for Everyone"
+      "1 → Delete for Me\n2 → Delete for Everyone"
     );
 
     if (choice === "1") {
       const updated = [...deletedForMe, id];
       setDeletedForMe(updated);
       localStorage.setItem("deletedForMe", JSON.stringify(updated));
-    } 
-    else if (choice === "2") {
+    } else if (choice === "2") {
       await axios.delete(`${API}/${id}`);
       fetchMessages();
     }
@@ -51,50 +49,123 @@ function App() {
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 600, margin: "auto" }}>
-      <h2 style={{ textAlign: "center" }}>💬 Chat App</h2>
+    <div style={styles.container}>
+      <h2 style={styles.header}>💬 Chat App</h2>
 
-      {messages
-        .filter((m) => !deletedForMe.includes(m._id))
-        .map((m) => (
-          <div
-            key={m._id}
-            style={{
-              border: "1px solid gray",
-              margin: "10px 0",
-              padding: "10px",
-              borderRadius: "8px",
-              backgroundColor: m.isPinned ? "lightyellow" : "white",
-            }}
-          >
-            <p>{m.isDeleted ? "🚫 Deleted" : m.content}</p>
-
-            <small>
-              {new Date(m.timestamp).toLocaleTimeString()}
-            </small>
-
-            <div style={{ marginTop: 5 }}>
-              <button onClick={() => handleDelete(m._id)}>
-                Delete
-              </button>
-
-              <button onClick={() => pinMsg(m._id)}>
-                {m.isPinned ? "Unpin" : "Pin"}
-              </button>
+      {/* Pinned Messages */}
+      <div style={styles.pinned}>
+        <h4>📌 Pinned</h4>
+        {messages
+          .filter((m) => m.isPinned)
+          .map((m) => (
+            <div key={m._id} style={styles.pinnedMsg}>
+              {m.content}
             </div>
-          </div>
-        ))}
+          ))}
+      </div>
 
-      <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+      {/* Chat Area */}
+      <div style={styles.chatBox}>
+        {messages
+          .filter((m) => !deletedForMe.includes(m._id))
+          .map((m, i) => (
+            <div
+              key={m._id}
+              style={{
+                ...styles.message,
+                alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
+                background: m.isPinned ? "#ffeaa7" : "#74b9ff",
+              }}
+            >
+              <p>{m.isDeleted ? "🚫 Deleted" : m.content}</p>
+              <small>
+                {new Date(m.timestamp).toLocaleTimeString()}
+              </small>
+
+              <div style={styles.actions}>
+                <button onClick={() => handleDelete(m._id)}>🗑</button>
+                <button onClick={() => pinMsg(m._id)}>
+                  {m.isPinned ? "❌" : "📌"}
+                </button>
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {/* Input */}
+      <div style={styles.inputBox}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type message..."
+          placeholder="Type a message..."
+          style={styles.input}
         />
-        <button onClick={sendMessage}>Send</button>
+        <button onClick={sendMessage} style={styles.sendBtn}>
+          Send
+        </button>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: "600px",
+    margin: "auto",
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    background: "#0f172a",
+    color: "white",
+    padding: "10px",
+  },
+  header: {
+    textAlign: "center",
+  },
+  chatBox: {
+    flex: 1,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    padding: "10px",
+  },
+  message: {
+    padding: "10px",
+    borderRadius: "10px",
+    maxWidth: "70%",
+  },
+  actions: {
+    display: "flex",
+    gap: "5px",
+    marginTop: "5px",
+  },
+  inputBox: {
+    display: "flex",
+    gap: "10px",
+  },
+  input: {
+    flex: 1,
+    padding: "10px",
+    borderRadius: "5px",
+    border: "none",
+  },
+  sendBtn: {
+    padding: "10px",
+    background: "#10b981",
+    border: "none",
+    color: "white",
+    borderRadius: "5px",
+  },
+  pinned: {
+    background: "#1e293b",
+    padding: "10px",
+    borderRadius: "8px",
+  },
+  pinnedMsg: {
+    fontSize: "12px",
+    color: "#facc15",
+  },
+};
 
 export default App;
