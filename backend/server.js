@@ -6,9 +6,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://127.0.0.1:27017/chatapp")
-  .then(() => console.log("MongoDB Connected"));
+const mongoose = require("mongoose");
 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => {
+    console.log("Mongo Error:", err);
+    process.exit(1); // optional but good
+  });
+
+  
 const Message = mongoose.model("Message", {
   content: String,
   timestamp: { type: Date, default: Date.now },
@@ -40,4 +47,5 @@ app.put("/api/messages/pin/:id", async (req, res) => {
   res.json(msg);
 });
 
-app.listen(5000, () => console.log("Server running on 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
