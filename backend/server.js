@@ -6,16 +6,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const mongoose = require("mongoose");
+// Debug log
+console.log("Using URI:", process.env.MONGO_URI);
 
+// MongoDB connect
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => {
     console.log("Mongo Error:", err);
-    process.exit(1); // optional but good
+    process.exit(1);
   });
 
-  
+// Model
 const Message = mongoose.model("Message", {
   content: String,
   timestamp: { type: Date, default: Date.now },
@@ -47,5 +49,6 @@ app.put("/api/messages/pin/:id", async (req, res) => {
   res.json(msg);
 });
 
+// Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
